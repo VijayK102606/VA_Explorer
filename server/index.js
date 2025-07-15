@@ -22,5 +22,5 @@ mongoose.connect(MONGOURL)
 app.use('/api', uploadRoutes);
 
 app.listen(EPORT, ()=> {
-    console.log(`port ${EPORT} in use`);
+    console.log(`Address: http://localhost:${EPORT}`);
 });
