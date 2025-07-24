@@ -7,6 +7,7 @@ const VadeExplorer = () => {
   const [message, setMessage] = useState('');
   const [recordCount, setRecordCount] = useState(12847);
 
+
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -19,6 +20,24 @@ const VadeExplorer = () => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => {
+    const fileBuffer = reader.result;
+    
+    // Send file to main process
+    window.electronAPI.send('saveFile', {
+      name: file.name,
+      buffer: fileBuffer,
+    });
+  };
+
+  reader.onerror = () => {
+    setMessage("Error reading file.");
+  };
+
+  reader.readAsArrayBuffer(file); // Read file as buffer
+};
+/*
     const formData = new FormData();
     formData.append("file", file);
 
@@ -40,7 +59,19 @@ const VadeExplorer = () => {
     } catch (error) {
       setMessage("Error uploading file: " + error.message);
     }
-  };
+*/
+useEffect(() => {
+  if (window.electronAPI && typeof window.electronAPI.receive === 'function') {
+    window.electronAPI.receive('fileSaved', (status) => {
+      if (status.success) {
+        setMessage("File saved locally via Electron!");
+        setRecordCount(prev => prev + 1);
+      } else {
+        setMessage("Error saving file: " + status.error);
+      }
+    });
+  }
+}, []);
 
   const viewTitles = {
     'overview': 'Database Overview',
@@ -227,7 +258,7 @@ const VadeExplorer = () => {
                 <h3>Database Overview</h3>
                 <ul>
                   <li><a onClick={() => handleNavClick('overview')} className={currentView === 'overview' ? 'active' : ''}>General Statistics</a></li>
-                  <li><a onClick={() => handleNavClick('records')} className={currentView === 'records' ? 'active' : ''}>Record Browser</a></li>
+                  <li><a onClick={() => handleNavClick('records')} className={currentView === 'records' ? 'active' : ''}>Record Browser</a></li> 
                   <li><a onClick={() => handleNavClick('upload')} className={currentView === 'upload' ? 'active' : ''}>Upload Data</a></li>
                 </ul>
               </div>
