@@ -1,5 +1,6 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let brows;
 
@@ -7,6 +8,7 @@ function start() {
     brows = new BrowserWindow({
         width:1000, 
         height:800,
+        autoHideMenuBar: true, // Hide the menu bar (File, View, Help, etc.)
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -15,7 +17,7 @@ function start() {
     });
 
 
-    brows.loadURL(process.env.ELECTRON_START_URL);
+    brows.loadURL('http://localhost:3000');
 
     brows.on('closed', () => {
         brows=null;
