@@ -52,6 +52,7 @@ body {
     animation: fade-in-backdrop 3.5s forwards;
     animation-delay: 1s;
     opacity: 0;
+    pointer-events: none; /* Prevent blocking clicks */
 }
 
 @keyframes fade-in-backdrop {
@@ -99,6 +100,8 @@ body {
     width: 100%;
     height: 100vh;
     display: flex;
+    position: relative;
+    z-index: 200; /* Ensure main interface is above backdrop elements */
 }
 
 @keyframes fade-in {
