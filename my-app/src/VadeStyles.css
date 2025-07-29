@@ -11,7 +11,7 @@
 body {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
     margin: 0;
-    overflow: hidden;
+    overflow: auto;
     color: #e0e0e0;
     height: 100vh;
 }
@@ -52,6 +52,7 @@ body {
     animation: fade-in-backdrop 3.5s forwards;
     animation-delay: 1s;
     opacity: 0;
+    pointer-events: none;
 }
 
 @keyframes fade-in-backdrop {
@@ -78,6 +79,8 @@ body {
     }
     100% {
         opacity: 0;
+        pointer-events: none;
+        z-index: -1;
     }
 }
 
@@ -89,6 +92,7 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: -200;
+    pointer-events: none;
 }
 
 /* Main Interface */
@@ -99,6 +103,9 @@ body {
     width: 100%;
     height: 100vh;
     display: flex;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 @keyframes fade-in {
@@ -204,8 +211,11 @@ body {
     flex: 1;
     height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 2rem;
     background: rgba(30, 30, 30, 0.3);
+    position: relative;
+    z-index: 1;
 }
 
 #content-header {
@@ -377,6 +387,9 @@ body {
     padding: 2rem;
     margin-top: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
 }
 
 .upload-form h3 {
@@ -393,6 +406,8 @@ body {
     color: #e0e0e0;
     width: 100%;
     margin-bottom: 1rem;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
 .upload-form button {
@@ -404,6 +419,9 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 3;
 }
 
 .upload-form button:hover {
