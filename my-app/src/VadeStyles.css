@@ -242,7 +242,6 @@ body {
 #record-count {
     background: rgba(74, 158, 255, 0.2);
     padding: 0.3rem 0.8rem;
-    border-radius: 20px;
     border: 1px solid rgba(74, 158, 255, 0.3);
     color: #4a9eff;
     font-weight: 500;
@@ -260,7 +259,6 @@ body {
     background: rgba(50, 50, 50, 0.6);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
     padding: 1.8rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
@@ -314,7 +312,6 @@ body {
 
 .bar {
     height: 6px;
-    border-radius: 3px;
     margin-right: 1rem;
     min-width: 20px;
     transition: all 0.3s ease;
@@ -383,7 +380,6 @@ body {
     background: rgba(50, 50, 50, 0.6);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
     padding: 2rem;
     margin-top: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -401,7 +397,6 @@ body {
 .upload-form input[type="file"] {
     background: rgba(40, 40, 40, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
     padding: 0.8rem;
     color: #e0e0e0;
     width: 100%;
@@ -413,7 +408,6 @@ body {
 .upload-form button {
     background: linear-gradient(90deg, #4a9eff, #357abd);
     border: none;
-    border-radius: 8px;
     padding: 0.8rem 2rem;
     color: white;
     font-weight: 500;
@@ -422,6 +416,7 @@ body {
     pointer-events: auto;
     position: relative;
     z-index: 3;
+    height: 3.2rem; /* Match the height of file inputs */
 }
 
 .upload-form button:hover {
@@ -430,12 +425,473 @@ body {
 }
 
 .upload-message {
-    margin-top: 1rem;
-    padding: 0.8rem;
-    border-radius: 8px;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
     background: rgba(74, 158, 255, 0.1);
     border: 1px solid rgba(74, 158, 255, 0.3);
     color: #4a9eff;
+}
+
+/* Data Table Styles */
+.data-table-container {
+  background: rgba(50, 50, 50, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.search-section {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-input {
+  background: rgba(40, 40, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  color: #e0e0e0;
+  width: 300px;
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+.clear-filters-btn {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  padding: 0.5rem 1rem;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(255, 107, 107, 0.3);
+  transform: translateY(-1px);
+}
+
+.table-info {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(30, 30, 30, 0.8);
+  color: #e0e0e0;
+}
+
+.data-table th {
+  background: rgba(50, 50, 50, 1);
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-width: 150px;
+}
+
+.column-header {
+  margin-bottom: 0.3rem;
+}
+
+.sort-button {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
+  transition: color 0.3s ease;
+}
+
+.sort-button:hover {
+  color: #4a9eff;
+}
+
+.sort-indicator {
+  color: #4a9eff;
+  font-weight: bold;
+}
+
+.column-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.filter-select,
+.filter-input {
+  background: rgba(40, 40, 40, 1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.2rem 0.4rem;
+  color: #d0d0d0;
+  font-size: 0.75rem;
+  width: 100%;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.filter-input {
+  margin-top: 0.15rem;
+}
+
+.data-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-row {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.data-row:hover {
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.data-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.data-row:nth-child(even):hover {
+  background: rgba(74, 158, 255, 0.12);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-btn {
+  background: rgba(50, 50, 50, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(74, 158, 255, 0.2);
+  border-color: #4a9eff;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* File Upload Enhancement */
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.file-upload-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.file-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-input-group label {
+  display: block;
+  color: #d0d0d0;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  height: 1.35rem; /* Fixed height for consistent spacing */
+}
+
+.file-input-group input[type="file"] {
+  background: rgba(40, 40, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.8rem;
+  color: #e0e0e0;
+  width: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.85rem; /* Account for label height + margin-bottom */
+}
+
+.upload-btn {
+  background: linear-gradient(90deg, #4a9eff, #357abd);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  height: 3.2rem; /* Match the height of file inputs */
+}
+
+.upload-btn:hover {
+  background: linear-gradient(90deg, #357abd, #2563eb);
+  transform: translateY(-1px);
+}
+
+.upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Demographics Analysis Styles */
+.demographics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.demographics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.demographic-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.field-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.field-status:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.field-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field-value.available {
+  color: #6bcf7f;
+}
+
+.field-value.missing {
+  color: #ff6b6b;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.chart-panel {
+  background: rgba(50, 50, 50, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.chart-panel.wide {
+  grid-column: 1 / -1;
+}
+
+.chart-panel h3 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.chart-container {
+  height: 300px;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.chart-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.summary-label {
+  color: #b0b0b0;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.85rem;
+  color: #b0b0b0;
+}
+
+.summary-stats span {
+  padding: 0.5rem 1rem;
+  background: rgba(40, 40, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Cause of Death Analysis Styles */
+.cause-analysis-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.analysis-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.analysis-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.detailed-breakdown {
+  margin-top: 2rem;
+}
+
+.breakdown-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.breakdown-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px 80px;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(40, 40, 40, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.breakdown-row:hover {
+  background: rgba(40, 40, 40, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.breakdown-row .rank {
+  color: #4a9eff;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.breakdown-row .cause-name {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.breakdown-row .cause-count {
+  color: #6bcf7f;
+  font-weight: 600;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.breakdown-row .cause-percentage {
+  color: #b0b0b0;
+  font-size: 0.85rem;
+  text-align: right;
 }
 
 /* Scrollbar Styling */
@@ -488,5 +944,22 @@ body {
 
     #dashboard-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .search-input {
+        width: 100%;
+    }
+
+    .data-table th,
+    .data-table td {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .pagination-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
     }
 }
