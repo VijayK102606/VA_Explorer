@@ -1,11 +1,19 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const fs = require('fs');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import { getLlama, LlamaContext, LlamaChatSession} from 'node-llama-cpp';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const modelPath = "/mnt/c/Users/AjayK/AppData/Local/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf";
+let llamaSession;
+//let llamaInstance;
 
 let brows;
 let detailWindows = new Map();
 
-function start() {
+async function start() {
   brows = new BrowserWindow({
     width: 1400,
     height: 800,
@@ -18,6 +26,20 @@ function start() {
   });
 
   brows.loadURL('http://localhost:3000');
+
+  try {
+    const llama = await getLlama();
+    const gpuType = false;
+    const model = await llama.loadModel({ modelPath: modelPath, gpu: gpuType });
+    const context = await model.createContext();
+    llamaSession = new LlamaChatSession({
+        contextSequence: context.getSequence()
+    });
+    console.log("Llama model loaded successfully");
+  } catch (err) {
+    console.error("Failed to load Llama model:", err);
+    llamaSession = null;
+  }
 
   brows.on('closed', () => {
     brows = null;
@@ -361,6 +383,28 @@ function generateDetailHTML(record, index, headers, codebook) {
     </html>
   `;
 }
+
+ipcMain.handle("ask-gpt", async(event, prompt) => {
+  let retries = 0;
+  while (!llamaSession && retries < 20) { // wait up to ~2s
+    await new Promise(r => setTimeout(r, 100));
+    retries++;
+  }
+  if (!llamaSession) return "Error: Model failed to load.";
+
+  try {
+    const response = await llamaSession.prompt(prompt, {
+      max_tokens: 256,
+      temperature: 0.7,
+      top_p: 0.9
+    });
+    return response.text;
+  } catch (error) {
+    return error.message;
+  }
+});
+
+ipcMain.handle("model-ready", () => modelReady);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

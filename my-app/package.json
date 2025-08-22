@@ -2,14 +2,19 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "electron.js",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0",
     "bootstrap": "^5.3.7",
     "chart.js": "^4.5.0",
+    "gpt4all": "^4.0.0",
+    "node-llama-cpp": "^3.12.1",
     "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
@@ -17,22 +22,19 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
     "react-scripts": "5.0.1",
+    "typescript": "^5.9.2",
     "web-vitals": "^2.1.4",
     "wordcloud": "^1.2.3",
     "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start\"",
-    "start:win": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start:win\"",
-    "start:mac": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start:mac\"",
     "react-start": "react-scripts start",
-    "electron-start": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
-    "electron-start:win": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
-    "electron-start:mac": "wait-on http://localhost:3000 && ./node_modules/.bin/electron .",
+    "electron-start": "wait-on http://localhost:3000 && electron .",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "node_modules\\.bin\\electron.cmd ."
+    "electron-dev": "npm_config_electron_prebuilt=true electron ."
   },
   "eslintConfig": {
     "extends": [
@@ -55,6 +57,7 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "electron": "^37.2.4",
+    "electron-rebuild": "^3.2.9",
     "wait-on": "^8.0.4"
   }
 }

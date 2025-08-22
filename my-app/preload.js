@@ -13,5 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     }
-  }
+  },
+
+  askGPT: (prompt) => ipcRenderer.invoke('ask-gpt', prompt)
 });

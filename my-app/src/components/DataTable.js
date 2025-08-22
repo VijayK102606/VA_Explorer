@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { getColumnHeaders, filterData, sortData } from '../utils/dataUtils';
+import { getColumnHeaders, filterData, sortData } from '../utils/dataUtils.js';
 import '../VadeStyles.css';
 
 const DataTable = ({ data, headers, codebook, onRowClick }) => {

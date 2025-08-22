@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import DataTable from './DataTable';
-import DemographicAnalysis from './DemographicAnalysis';
-import CauseOfDeathAnalysis from './CauseOfDeathAnalysis';
-import { parseDataFile, parseCodebook, applyCodebook } from '../utils/dataUtils';
+import DataTable from './DataTable.js';
+import DemographicAnalysis from './DemographicAnalysis.js';
+import CauseOfDeathAnalysis from './CauseOfDeathAnalysis.js';
+import Insights from './Insights.js';
+import { parseDataFile, parseCodebook, applyCodebook } from '../utils/dataUtils.js';
 import '../VadeStyles.css';
+
 
 const VadeExplorer = () => {
   const [currentView, setCurrentView] = useState('overview');
@@ -91,7 +93,8 @@ const VadeExplorer = () => {
     'patterns': 'Pattern Analysis',
     'compare': 'Regional Comparison',
     'export': 'Data Export',
-    'about': 'About VA Explorer'
+    'about': 'About VA Explorer',
+    'insights': 'AI Insights',
   };
 
   const handleNavClick = (view) => {
@@ -173,6 +176,16 @@ const VadeExplorer = () => {
                 <p>• Example: "1" becomes "Male", "2" becomes "Female"</p>
               </div>
             </div>
+          </div>
+        );
+
+      case 'insights':
+        return (
+          <div>
+            <Insights data={processedData}
+            headers={headers}
+            codebook={codebook}
+            />
           </div>
         );
 
@@ -471,6 +484,7 @@ const VadeExplorer = () => {
                   <li><a onClick={() => handleNavClick('patterns')} className={currentView === 'patterns' ? 'active' : ''}>Pattern Analysis</a></li>
                   <li><a onClick={() => handleNavClick('compare')} className={currentView === 'compare' ? 'active' : ''}>Compare Regions</a></li>
                   <li><a onClick={() => handleNavClick('export')} className={currentView === 'export' ? 'active' : ''}>Export Data</a></li>
+                  <li><a onClick={() => handleNavClick('insights')} className={currentView === 'insights' ? 'active' : ''}>AI Insights</a></li>
                 </ul>
               </div>
               <div className="nav-section">
