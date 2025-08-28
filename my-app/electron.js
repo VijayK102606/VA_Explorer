@@ -6,12 +6,31 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const modelPath = "/mnt/c/Users/AjayK/AppData/Local/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf";
+const modelPath = path.resolve(__dirname, "models/Meta-Llama-3-8B-Instruct.Q4_0.gguf");
 let llamaSession;
 //let llamaInstance;
 
 let brows;
 let detailWindows = new Map();
+
+async function initLlama() {
+  if (!fs.existsSync(modelPath)) {
+    console.error("Model not found at path:", modelPath);
+    return null;
+  }
+  
+  try {
+    const llama = await getLlama();
+    const model = await llama.loadModel({ model: modelPath, gpu: false, }); // CPU only
+    const context = await model.createContext();
+    const session = new LlamaChatSession({ contextSequence: context.getSequence() });
+    console.log("Llama loaded successfully");
+    return session;
+  } catch (err) {
+    console.error("Failed to load Llama:", err);
+    return null;
+  }
+}
 
 async function start() {
   brows = new BrowserWindow({
@@ -27,19 +46,7 @@ async function start() {
 
   brows.loadURL('http://localhost:3000');
 
-  try {
-    const llama = await getLlama();
-    const gpuType = false;
-    const model = await llama.loadModel({ modelPath: modelPath, gpu: gpuType });
-    const context = await model.createContext();
-    llamaSession = new LlamaChatSession({
-        contextSequence: context.getSequence()
-    });
-    console.log("Llama model loaded successfully");
-  } catch (err) {
-    console.error("Failed to load Llama model:", err);
-    llamaSession = null;
-  }
+  await initLlama();
 
   brows.on('closed', () => {
     brows = null;
@@ -385,11 +392,7 @@ function generateDetailHTML(record, index, headers, codebook) {
 }
 
 ipcMain.handle("ask-gpt", async(event, prompt) => {
-  let retries = 0;
-  while (!llamaSession && retries < 20) { // wait up to ~2s
-    await new Promise(r => setTimeout(r, 100));
-    retries++;
-  }
+  
   if (!llamaSession) return "Error: Model failed to load.";
 
   try {
