@@ -1,0 +1,12 @@
+8/22
+- put LLM disclaimer
+- Write installation document in README
+- fix llm prompt length to include all data
+- Test on other VA data besides the main one
+- need dark scrollbar UI in Record Browser
+- LLM should have drafted responses
+
+8/15
+- Language model chatbot per-entry
+- Language model chatbot with selected entries (unified interface?)
+  ^ need select system in Record Browser
