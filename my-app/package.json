@@ -23,16 +23,17 @@
   },
   "scripts": {
     "start": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start\"",
-    "start:win": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start:win\"",
+    "start:win": "concurrently --kill-others \"cd ../server && npm start\" \"npm run react-start\" \"npm run electron-start:win\"",
     "start:mac": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start:mac\"",
-    "react-start": "react-scripts start",
+    "react-start": "set BROWSER=none && react-scripts start",
     "electron-start": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
     "electron-start:win": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
     "electron-start:mac": "wait-on http://localhost:3000 && ./node_modules/.bin/electron .",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "node_modules\\.bin\\electron.cmd ."
+    "electron-dev": "node_modules\\.bin\\electron.cmd .",
+    "pack": "npm run build && npx electron-builder --win --x64"
   },
   "eslintConfig": {
     "extends": [
@@ -55,6 +56,25 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "electron": "^37.2.4",
-    "wait-on": "^8.0.4"
+    "wait-on": "^8.0.4",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "va.explorer.app",
+    "productName": "VA Explorer",
+    "files": [
+      "build/**",
+      "electron.js",
+      "preload.js",
+      "detail-preload.js",
+      "../server/**"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }

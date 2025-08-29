@@ -1,11 +1,34 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 
 let brows;
 let detailWindows = new Map();
+let serverProcess;
+
+function startServer() {
+  // Start the server process
+  const serverPath = path.join(__dirname, '..', 'server');
+  serverProcess = spawn(
+    process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    ['run', 'start'],
+    { cwd: serverPath, shell: true }
+  );
+  serverProcess.stdout.on('data', data => {
+    console.log(`[server] ${data}`);
+  });
+  serverProcess.stderr.on('data', data => {
+    console.error(`[server] ${data}`);
+  });
+  serverProcess.on('close', code => {
+    console.log(`Server exited with code ${code}`);
+  });
+}
 
 function start() {
+  startServer();
+
   brows = new BrowserWindow({
     width: 1400,
     height: 800,
@@ -17,7 +40,12 @@ function start() {
     },
   });
 
-  brows.loadURL('http://localhost:3000');
+  if (app.isPackaged) {
+    // Load local build files in production
+    brows.loadFile(path.join(__dirname, 'build', 'index.html'));
+  } else {
+    brows.loadURL('http://localhost:3000');
+  }
 
   brows.on('closed', () => {
     brows = null;
@@ -27,6 +55,9 @@ function start() {
       }
     });
     detailWindows.clear();
+    if (serverProcess) {
+      serverProcess.kill();
+    }
   });
 }
 
@@ -120,7 +151,8 @@ function generateDetailHTML(record, index, headers, codebook) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Record Details - ${index + 1}</title>
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box;font-family: 'Montserrat', Arial, sans-serif; }
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
@@ -133,6 +165,54 @@ function generateDetailHTML(record, index, headers, codebook) {
           background: rgba(50, 50, 50, 0.8);
           padding: 1.5rem;
           margin-bottom: 2rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0;
+        }
+
+        .header h1 {
+          color: #ffffff;
+          font-size: 1.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+          color: #b0b0b0;
+          font-size: 0.95rem;
+        }
+
+        .wordcloud-header h2 {
+          color: #4a9eff;
+          font-size: 1.25rem;
+          margin: 1rem 0;
+        }
+
+        #wordcloud {
+          margin-bottom: 2rem;
+          background: #1a1a1a;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0;
+          padding: 1.5rem;
+          overflow: hidden;
+          height: 350px;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .record-container {
+          background: rgba(50, 50, 50, 0.6);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 0;
+          padding: 1.5rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .field-row {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 1rem;
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 0;
         }
@@ -211,9 +291,127 @@ function generateDetailHTML(record, index, headers, codebook) {
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        .chatbot-container {
+          width: 100%;
+          background: rgba(40, 40, 40, 0.85);
+          border-bottom: 1px solid #222;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+          margin-bottom: 1.5rem;
+          padding: 1.5rem 2rem 1rem 2rem;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          min-height: 220px;
+          max-height: 700px;
+          height: auto;
+        }
+        .chatbot-title {
+          font-size: 1.1rem;
+          color: #4a9eff;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+        .chatbot-chatbox {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+        }
+        .chatbot-messages {
+          min-height: 120px;
+          max-height: 500px;
+          overflow-y: auto;
+          margin-bottom: 0.5rem;
+          font-size: 0.98rem;
+          color: #e0e0e0;
+          padding: 0.5rem 0.2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .chatbot-form {
+          display: flex;
+          gap: 0.5rem;
+          width: 100%;
+        }
+        .chatbot-input {
+          flex: 1;
+          padding: 0.5rem 0.8rem;
+          border: 1px solid #4a9eff;
+          background: #181818;
+          color: #e0e0e0;
+          font-size: 1rem;
+          transition: border 0.2s;
+          border-radius: 0;
+        }
+        .chatbot-input:focus {
+          outline: none;
+          border-color: #93c5fd;
+        }
+        .chatbot-btn {
+          padding: 0.5rem 1.2rem;
+          background: linear-gradient(90deg, #4a9eff, #357abd);
+          color: #fff;
+          border: none;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s;
+          border-radius: 0;
+        }
+        .chatbot-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .chatbot-btn:hover:not(:disabled) {
+          background: linear-gradient(90deg, #357abd, #2563eb);
+        }
+        .chatbot-error {
+          color: #ff4a4a;
+          font-size: 0.95rem;
+          margin-top: 0.5rem;
+        }
+        .chatbot-bubble-user {
+          align-self: flex-end;
+          background: #4a9eff;
+          color: #fff;
+          padding: 0.7rem 1.2rem;
+          max-width: 70%;
+          font-size: 1rem;
+          border-radius: 0;
+          margin-right: 0.5rem;
+          margin-left: 2rem;
+          box-shadow: 0 2px 8px rgba(74,158,255,0.10);
+        }
+        .chatbot-bubble-bot {
+          align-self: flex-start;
+          background: #222;
+          color: #e0e0e0;
+          padding: 0.7rem 1.2rem;
+          max-width: 70%;
+          font-size: 1rem;
+          border-radius: 0;
+          margin-left: 0.5rem;
+          margin-right: 2rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
       </style>
     </head>
     <body>
+      <div class="chatbot-container">
+        <div class="chatbot-title">Ask about this entry</div>
+        <div class="chatbot-chatbox">
+          <div class="chatbot-messages" id="chatbot-messages"></div>
+          <form class="chatbot-form" id="chatbot-form" autocomplete="off">
+            <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Type your question..." />
+            <button id="chatbot-btn" class="chatbot-btn" type="submit">Ask</button>
+          </form>
+        </div>
+        <div id="chatbot-error" class="chatbot-error" style="display:none;"></div>
+        <div style="margin-top:1rem; font-size:0.85rem; color:#b0b0b0; text-align:center;">
+          <em>Disclaimer: Answers are generated by a language model and may contain errors or inaccuracies. Please verify information before use.</em>
+        </div>
+      </div>
       <div class="header">
         <h1>Verbal Autopsy Record Details</h1>
         <div class="subtitle">Record #${index + 1} of dataset</div>
@@ -356,6 +554,58 @@ function generateDetailHTML(record, index, headers, codebook) {
           
           console.log('Word cloud created successfully with', meaningfulWords.length, 'words');
         }
+
+        // Chatbot logic
+        const chatbotForm = document.getElementById('chatbot-form');
+        const chatbotBtn = document.getElementById('chatbot-btn');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        const chatbotError = document.getElementById('chatbot-error');
+        const entryData = ${JSON.stringify(record)};
+        let isLoading = false;
+        function addMessage(text, sender) {
+          const msgDiv = document.createElement('div');
+          msgDiv.className = sender === 'user' ? 'chatbot-bubble-user' : 'chatbot-bubble-bot';
+          if (sender === 'bot') {
+            msgDiv.innerHTML = text;
+          } else {
+            msgDiv.textContent = text;
+          }
+          chatbotMessages.appendChild(msgDiv);
+          chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+        function setLoading(loading) {
+          isLoading = loading;
+          chatbotBtn.disabled = loading;
+          chatbotBtn.textContent = loading ? '...' : 'Ask';
+        }
+        chatbotForm.onsubmit = async function(e) {
+          e.preventDefault();
+          const question = chatbotInput.value.trim();
+          chatbotError.style.display = 'none';
+          if (!question || isLoading) return;
+          addMessage(question, 'user');
+          chatbotInput.value = '';
+          setLoading(true);
+          try {
+            const res = await fetch('http://localhost:4000/api/chatbot', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ question, entry: entryData })
+            });
+            const data = await res.json();
+            if (res.ok && data.answer) {
+              addMessage(data.answer, 'bot');
+            } else {
+              chatbotError.textContent = data.error || 'No answer.';
+              chatbotError.style.display = 'block';
+            }
+          } catch (err) {
+            chatbotError.textContent = 'Error contacting chatbot.';
+            chatbotError.style.display = 'block';
+          }
+          setLoading(false);
+        };
       </script>
     </body>
     </html>
