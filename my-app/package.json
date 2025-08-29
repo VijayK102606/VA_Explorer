@@ -27,11 +27,27 @@
     "wordcloud": "^1.2.3",
     "xlsx": "^0.18.5"
   },
+  "build": {
+  "appId": "com.myapp.id",
+  "productName": "VA Explorer",
+  "files": [
+    "electron.js",
+    "package.json",
+    "build/**/*"
+  ],
+  "directories": {
+    "buildResources": "assets"
+  },
+  "win": {
+    "target": "nsis"
+  }
+},
   "scripts": {
     "start": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start\"",
     "react-start": "react-scripts start",
     "electron-start": "wait-on http://localhost:3000 && electron .",
     "build": "react-scripts build",
+    "dist": "npm run build && electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron-dev": "npm_config_electron_prebuilt=true electron ."
@@ -57,6 +73,7 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "electron": "^37.2.4",
+    "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "wait-on": "^8.0.4"
   }
