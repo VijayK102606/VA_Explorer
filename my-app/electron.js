@@ -8,22 +8,48 @@ let detailWindows = new Map();
 let serverProcess;
 
 function startServer() {
-  // Start the server process
-  const serverPath = path.join(__dirname, '..', 'server');
-  serverProcess = spawn(
-    process.platform === 'win32' ? 'npm.cmd' : 'npm',
-    ['run', 'start'],
-    { cwd: serverPath, shell: true }
-  );
-  serverProcess.stdout.on('data', data => {
-    console.log(`[server] ${data}`);
-  });
-  serverProcess.stderr.on('data', data => {
-    console.error(`[server] ${data}`);
-  });
-  serverProcess.on('close', code => {
-    console.log(`Server exited with code ${code}`);
-  });
+  // Determine server folder depending on dev vs packaged
+  let serverPath;
+  if (app.isPackaged) {
+    // when packaged extraResources are copied into resources path (extraResources in package.json)
+    serverPath = path.join(process.resourcesPath, 'server');
+  } else {
+    serverPath = path.join(__dirname, '..', 'server');
+  }
+
+  const serverEntry = path.join(serverPath, 'index.js');
+
+  if (!fs.existsSync(serverEntry)) {
+    console.error('Server entry not found at', serverEntry);
+    return;
+  }
+
+  // Spawn the server script directly using the current Node/Electron executable.
+  // This avoids relying on npm/npm.cmd being available on the target machine.
+  try {
+    serverProcess = spawn(process.execPath, [serverEntry], {
+      cwd: serverPath,
+      env: process.env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: false
+    });
+
+    serverProcess.stdout.on('data', data => {
+      console.log(`[server] ${data}`);
+    });
+    serverProcess.stderr.on('data', data => {
+      console.error(`[server] ${data}`);
+    });
+    serverProcess.on('error', (err) => {
+      console.error('Failed to start server process:', err);
+    });
+    serverProcess.on('close', (code) => {
+      console.log(`Server exited with code ${code}`);
+      serverProcess = null;
+    });
+  } catch (err) {
+    console.error('Exception when starting server:', err);
+  }
 }
 
 function start() {
@@ -41,7 +67,7 @@ function start() {
   });
 
   if (app.isPackaged) {
-    // Load local build files in production
+    // Load local build files in production (file://). CRA assets must be relative.
     brows.loadFile(path.join(__dirname, 'build', 'index.html'));
   } else {
     brows.loadURL('http://localhost:3000');
@@ -613,6 +639,11 @@ function generateDetailHTML(record, index, headers, codebook) {
 }
 
 app.on('window-all-closed', () => {
+  if (serverProcess && !serverProcess.killed) {
+    try {
+      serverProcess.kill();
+    } catch (err) { /* ignore */ }
+  }
   if (process.platform !== 'darwin') {
     app.quit();
   }

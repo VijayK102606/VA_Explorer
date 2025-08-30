@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "electron.js",
+  "homepage": ".",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -33,7 +34,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron-dev": "node_modules\\.bin\\electron.cmd .",
-    "pack": "npm run build && npx electron-builder --win --x64"
+    "pack": "npm run build && npx electron-builder --win --x64",
+    "build:win": "npm run build && npx electron-builder --win --x64",
+    "dist": "npm run build:win"
   },
   "eslintConfig": {
     "extends": [
@@ -63,18 +66,28 @@
     "appId": "va.explorer.app",
     "productName": "VA Explorer",
     "files": [
-      "build/**",
+      "build/**/*",
       "electron.js",
       "preload.js",
-      "detail-preload.js",
-      "../server/**"
+      "detail-preload.js"
     ],
+    "extraResources": [
+      "../server/**/*"
+    ],
+    "asar": false,
     "directories": {
       "buildResources": "assets",
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "${productName}-Setup-${version}-x64.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
