@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from './DataTable';
+import DataSelectionTable from './DataSelectionTable';
 import DemographicAnalysis from './DemographicAnalysis';
 import CauseOfDeathAnalysis from './CauseOfDeathAnalysis';
 import { parseDataFile, parseCodebook, applyCodebook } from '../utils/dataUtils';
@@ -17,6 +18,45 @@ const VadeExplorer = () => {
   const [headers, setHeaders] = useState([]);
   const [codebook, setCodebook] = useState(null);
   const [recordCount, setRecordCount] = useState(0);
+
+  const [selected, setSelected] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const newMessages = [...messages, {role: "user", content: input}];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+    setError(null);
+
+    try {
+        const res = await fetch("http://localhost:5000/api/chatbot-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+          question: input,
+          entries: selected, // 👈 this is your hook array
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setMessages([...newMessages, { role: "assistant", content: data.answer }]);
+    } catch(err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -80,6 +120,25 @@ const VadeExplorer = () => {
     }
   };
 
+  const handleRowSelection = (row, index) => {
+    if (window.electronAPI) {
+      window.electronAPI.send('caseSelection', {
+        record: row,
+        index: index,
+        headers: headers,
+        codebook: codebook
+      });
+    }
+  };
+
+  const handleOpenSelectionModal = () => {
+    setShowModal(true);
+  }
+
+  const handleCloseSelectionModal = () => {
+    setShowModal(false);
+  }
+
   const viewTitles = {
     'overview': 'Database Overview',
     'records': 'Record Browser',
@@ -88,6 +147,7 @@ const VadeExplorer = () => {
     'demographic': 'Demographic Analysis',
     'geographic': 'Geographic Distribution',
     'temporal': 'Temporal Trends',
+    'insights': 'AI insights',
     'patterns': 'Pattern Analysis',
     'compare': 'Regional Comparison',
     'export': 'Data Export',
@@ -97,6 +157,10 @@ const VadeExplorer = () => {
   const handleNavClick = (view) => {
     setCurrentView(view);
   };
+
+  const removeSelected = () => {
+    setSelected([]);
+  }
 
   const renderContent = () => {
     switch(currentView) {
@@ -272,6 +336,113 @@ const VadeExplorer = () => {
             </p>
           </div>
         );
+
+        case 'insights':
+          return (
+          <>
+              {processedData.length > 0 ? (
+              <>
+                <h3>Click ‘Select’ to choose cases for AI analysis.</h3>
+                <div className="buttons">
+                  <button 
+                    onClick={()=> handleOpenSelectionModal()}
+                    className="insight-btn"
+                  >Select</button>
+                  <button
+                    onClick={()=> removeSelected()}
+                    className="insight-btn"
+                  >Unselect</button>
+                  <button 
+                    onClick={()=> handleCloseSelectionModal()}
+                    className="insight-btn"
+                  >Close</button>   
+                </div>
+                <div className="num-selected">{selected.length} cases selected</div>
+
+                {selected.length > 0 && (
+                  <div className="chatbot-container">
+                    <div className="chatbot-title">Ask about selected entry</div>
+                    <div className="chatbot-chatbox">
+                      <div className="chatbot-messages">
+                        {messages.map((msg, idx)=> (
+                          <div
+                            key={idx}
+                            className={`chatbot-message ${msg.role}`}
+                            dangerouslySetInnerHTML={{ __html: msg.content }}
+                          />
+                        ))}
+                        {loading && <div className="chatbot-message assistant">Thinking...</div>}  
+                      </div>
+
+                      <form className="chatbot-form" onSubmit={handleSubmit} autoComplete="off">
+                        <input
+                          type="text"
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          className="chatbot-input"
+                          placeholder="Type your question..."
+                        />
+                        <button className="chatbot-btn" type="submit" disabled={loading}>
+                          Ask
+                        </button>
+                      </form>
+                    </div>
+
+                    {error && <div className="chatbot-error">{error}</div>}
+
+                    <div style={{ marginTop: "1rem", fontSize: "0.85rem", color: "#b0b0b0", textAlign: "center" }}>
+                      <em>
+                        Disclaimer: Answers are generated by a language model and may contain errors or inaccuracies.
+                        Please verify information before use.
+                      </em>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="stat-panel">
+                <h3>No Records Available</h3>
+                <p style={{ color: '#d0d0d0', marginBottom: '1rem' }}>
+                  Please upload a data file to view and browse records.
+                </p>
+                <button 
+                  className="upload-btn"
+                  onClick={() => setCurrentView('upload')}
+                >
+                  Upload Data File
+                </button>
+              </div>
+            )}
+
+
+              {showModal && (
+                  processedData.length > 0 ? (
+              <>
+                  <DataSelectionTable 
+                    data={processedData}
+                    headers={headers}
+                    codebook={codebook}
+                    selected={selected}
+                    setSelected={setSelected}
+                  />
+              </>
+                ) : (
+                  <div className="stat-panel">
+                    <h3>No Records Available</h3>
+                    <p style={{color: '#d0d0d0', marginBottom: '1rem'}}>
+                      Please upload a data file to view and browse records.
+                    </p>
+                    <button 
+                      className="upload-btn"
+                      onClick={() => setCurrentView('upload')}
+                    >
+                      Upload Data File
+                    </button>
+                  </div>
+                )
+              )}
+            </>
+          );
 
       case 'export':
         return (
@@ -471,6 +642,7 @@ const VadeExplorer = () => {
                   <li><a onClick={() => handleNavClick('patterns')} className={currentView === 'patterns' ? 'active' : ''}>Pattern Analysis</a></li>
                   <li><a onClick={() => handleNavClick('compare')} className={currentView === 'compare' ? 'active' : ''}>Compare Regions</a></li>
                   <li><a onClick={() => handleNavClick('export')} className={currentView === 'export' ? 'active' : ''}>Export Data</a></li>
+                  <li><a onClick={() => handleNavClick('insights')} className={currentView === 'insights' ? 'active': ''}>AI Insights</a></li>
                 </ul>
               </div>
               <div className="nav-section">

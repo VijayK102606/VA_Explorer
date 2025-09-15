@@ -27,7 +27,7 @@
     "start:win": "concurrently --kill-others \"cd ../server && npm start\" \"npm run react-start\" \"npm run electron-start:win\"",
     "start:mac": "concurrently --kill-others \"npm run react-start\" \"npm run electron-start:mac\"",
     "react-start": "set BROWSER=none && react-scripts start",
-    "electron-start": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
+    "electron-start": "wait-on http://localhost:3000 && electron .",
     "electron-start:win": "wait-on http://localhost:3000 && node_modules\\.bin\\electron.cmd .",
     "electron-start:mac": "wait-on http://localhost:3000 && ./node_modules/.bin/electron .",
     "build": "react-scripts build",

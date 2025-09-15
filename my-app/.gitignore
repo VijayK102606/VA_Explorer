@@ -4,6 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
+*.csv
+*.xlsx
+build/
+dist/
 
 **/.env
 **/.env.*
